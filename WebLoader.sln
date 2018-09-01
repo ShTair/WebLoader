@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebLoader", "WebLoader\WebLoader.csproj", "{80625390-CF88-4BAF-9E19-0B337F1572FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{80625390-CF88-4BAF-9E19-0B337F1572FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80625390-CF88-4BAF-9E19-0B337F1572FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80625390-CF88-4BAF-9E19-0B337F1572FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80625390-CF88-4BAF-9E19-0B337F1572FC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {28B32518-6C0D-4BFC-9FAA-E7EC236F5385}
+	EndGlobalSection
+EndGlobal
