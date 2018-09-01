@@ -8,6 +8,8 @@
 
         public string Password { get; set; }
 
+        public string EncodingName { get; set; }
+
         public string BasePath { get; set; }
 
         public string VaultPath { get; set; }

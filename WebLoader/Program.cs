@@ -11,6 +11,7 @@ namespace WebLoader
     {
         static void Main(string[] args)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Run(args[0]).Wait();
         }
 
@@ -20,7 +21,7 @@ namespace WebLoader
 
             var client = new FtpClient(param.Host, param.UserName, param.Password);
             client.DownloadDataType = FtpDataType.Binary;
-            client.Encoding = Encoding.Default;
+            client.Encoding = Encoding.GetEncoding(param.EncodingName);
             await client.ConnectAsync();
 
             Directory.CreateDirectory(param.VaultPath);

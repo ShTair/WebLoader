@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="FluentFTP" Version="19.2.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
   </ItemGroup>
 
 </Project>
