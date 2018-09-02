@@ -12,6 +12,8 @@
 
         public string BasePath { get; set; }
 
+        public string[] IgnorePaths { get; set; }
+
         public string VaultPath { get; set; }
     }
 }

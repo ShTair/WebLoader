@@ -1,6 +1,7 @@
 ﻿using FluentFTP;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,8 @@ namespace WebLoader
             Run(args[0]).Wait();
         }
 
+        private static HashSet<string> _ignorePaths;
+
         private static async Task Run(string paramFile)
         {
             var param = await LoadParamAsync(paramFile);
@@ -24,6 +27,7 @@ namespace WebLoader
             client.Encoding = Encoding.GetEncoding(param.EncodingName);
             await client.ConnectAsync();
 
+            _ignorePaths = new HashSet<string>(param.IgnorePaths);
             Directory.CreateDirectory(param.VaultPath);
             try
             {
@@ -40,6 +44,8 @@ namespace WebLoader
             var items = await client.GetListingAsync(path, FtpListOption.AllFiles);
             foreach (var item in items)
             {
+                if (_ignorePaths.Contains(item.FullName)) continue;
+
                 switch (item.Type)
                 {
                     case FtpFileSystemObjectType.File:
