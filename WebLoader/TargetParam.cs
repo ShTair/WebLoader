@@ -14,6 +14,8 @@
 
         public string[] IgnorePaths { get; set; }
 
+        public string[] UndeletableNames { get; set; }
+
         public string VaultPath { get; set; }
     }
 }
