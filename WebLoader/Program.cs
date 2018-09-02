@@ -71,7 +71,7 @@ namespace WebLoader
                         {
                             existsFiles.Remove(item.Name);
                             var file = new FileInfo(Path.Combine(dstPath, item.Name));
-                            if (!file.Exists | file.LastWriteTime != item.Modified | file.Length != item.Size)
+                            if (!file.Exists || file.LastWriteTime != item.Modified || file.Length != item.Size)
                             {
                                 await _writer.WriteLineAsync($"!: {item.FullName}");
                                 Console.WriteLine($"!: {item.FullName}");
