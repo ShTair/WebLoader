@@ -70,13 +70,16 @@ namespace WebLoader
                     case FtpFileSystemObjectType.File:
                         {
                             existsFiles.Remove(item.Name);
-                            var filePath = Path.Combine(dstPath, item.Name);
-                            if (!File.Exists(filePath) | (File.GetLastWriteTime(filePath) != item.Modified))
+                            var file = new FileInfo(Path.Combine(dstPath, item.Name));
+                            if (!file.Exists | file.LastWriteTime != item.Modified | file.Length != item.Size)
                             {
                                 await _writer.WriteLineAsync($"!: {item.FullName}");
                                 Console.WriteLine($"!: {item.FullName}");
-                                await client.DownloadFileAsync(filePath, item.FullName);
-                                File.SetLastWriteTime(filePath, item.Modified);
+                                await client.DownloadFileAsync(file.FullName, item.FullName);
+
+                                file.Refresh();
+                                if (file.Length != item.Size) throw new Exception();
+                                file.LastWriteTime = item.Modified;
                             }
                             else
                             {
