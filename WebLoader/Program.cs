@@ -25,7 +25,7 @@ namespace WebLoader
         {
             var now = DateTime.Now;
             Directory.CreateDirectory("logs");
-            using (_writer = new StreamWriter(Path.Combine("logs", $"log_{now:yyyy-MM-dd-HH-mm-ss}.txt")))
+            using (_writer = new StreamWriter(Path.Combine("logs", $"log_{now:yyyy-MM-dd_HH-mm-ss}.txt")))
             {
                 await _writer.WriteLineAsync($"Start: {now:yyyy/MM/dd HH:mm:ss}");
 
