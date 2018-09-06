@@ -37,7 +37,15 @@ namespace WebLoader
 
                 var param = await LoadParamAsync(paramFile);
 
-                var client = CreateSftpClient(param);
+                IFileClient client;
+                if (param.Protocol.Equals("sftp", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    client = CreateSftpClient(param);
+                }
+                else
+                {
+                    client = await CreateFtpClient(param);
+                }
 
                 _ignoreRegices = param.IgnorePaths.Select(t => new Regex(t)).ToArray();
 
