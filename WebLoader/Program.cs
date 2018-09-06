@@ -1,12 +1,13 @@
-﻿using FluentFTP;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using WebLoader.Clients;
 
 namespace WebLoader
 {
@@ -18,7 +19,7 @@ namespace WebLoader
             Run(args[0]).Wait();
         }
 
-        private static HashSet<string> _ignorePaths;
+        private static Regex[] _ignoreRegices;
         private static HashSet<string> _undeletableNames;
         private static StreamWriter _writer;
 
@@ -36,12 +37,18 @@ namespace WebLoader
 
                 var param = await LoadParamAsync(paramFile);
 
-                var client = new FtpClient(param.Host, param.UserName, param.Password);
-                client.DownloadDataType = FtpDataType.Binary;
-                client.Encoding = Encoding.GetEncoding(param.EncodingName);
-                await client.ConnectAsync();
+                IFileClient client;
+                if (param.Protocol.Equals("sftp", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    client = CreateSftpClient(param);
+                }
+                else
+                {
+                    client = await CreateFtpClient(param);
+                }
 
-                _ignorePaths = new HashSet<string>(param.IgnorePaths);
+                _ignoreRegices = param.IgnorePaths.Select(t => new Regex(t)).ToArray();
+
                 _undeletableNames = new HashSet<string>(param.UndeletableNames);
                 Directory.CreateDirectory(param.VaultPath);
                 try
@@ -60,19 +67,33 @@ namespace WebLoader
             }
         }
 
-        private static async Task LoadDirectoriesAsync(FtpClient client, string path, string dstPath)
+        private static async Task<IFileClient> CreateFtpClient(TargetParam param)
+        {
+            var client = new FtpFileClient(param.Host, param.UserName, param.Password, param.EncodingName);
+            await client.ConnectAsync();
+            return client;
+        }
+
+        private static IFileClient CreateSftpClient(TargetParam param)
+        {
+            var client = new SftpFileClient(param.Host, param.UserName, param.Password);
+            client.Connect();
+            return client;
+        }
+
+        private static async Task LoadDirectoriesAsync(IFileClient client, string path, string dstPath)
         {
             var existsFiles = Directory.EnumerateFiles(dstPath).Select(Path.GetFileName).ToList();
             var existsDirectories = Directory.EnumerateDirectories(dstPath).Select(Path.GetFileName).ToList();
 
-            var items = await client.GetListingAsync(path, FtpListOption.AllFiles);
+            var items = await client.GetItemsAsync(path);
             foreach (var item in items)
             {
-                if (_ignorePaths.Contains(item.FullName)) continue;
+                if (_ignoreRegices.Any(t => t.IsMatch(item.FullName))) continue;
 
                 switch (item.Type)
                 {
-                    case FtpFileSystemObjectType.File:
+                    case ItemType.File:
                         {
                             existsFiles.Remove(item.Name);
                             var file = new FileInfo(Path.Combine(dstPath, item.Name));
@@ -80,7 +101,7 @@ namespace WebLoader
                             {
                                 await _writer.WriteLineAsync($"!: {item.FullName}");
                                 Console.WriteLine($"!: {item.FullName}");
-                                await client.DownloadFileAsync(file.FullName, item.FullName);
+                                await client.DownloadFileAsync(item.FullName, file.FullName);
 
                                 file.Refresh();
                                 if (file.Length != item.Size) throw new Exception();
@@ -93,7 +114,7 @@ namespace WebLoader
                             }
                         }
                         break;
-                    case FtpFileSystemObjectType.Directory:
+                    case ItemType.Directory:
                         {
                             existsDirectories.Remove(item.Name);
                             await _writer.WriteLineAsync($"D: {item.FullName}");
@@ -106,9 +127,9 @@ namespace WebLoader
                             Directory.SetLastWriteTime(ndpath, item.Modified);
                         }
                         break;
-                    case FtpFileSystemObjectType.Link:
-                        await _writer.WriteLineAsync($"L: {item.FullName}");
-                        Console.WriteLine($"L: {item.FullName}");
+                    case ItemType.Others:
+                        await _writer.WriteLineAsync($"O: {item.FullName}");
+                        Console.WriteLine($"O: {item.FullName}");
                         break;
                     default:
                         await _writer.WriteLineAsync($"?: {item.FullName}");

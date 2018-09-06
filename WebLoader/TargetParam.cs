@@ -2,6 +2,8 @@
 {
     class TargetParam
     {
+        public string Protocol { get; set; }
+
         public string Host { get; set; }
 
         public string UserName { get; set; }
