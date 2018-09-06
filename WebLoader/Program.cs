@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using WebLoader.Clients;
@@ -24,8 +25,12 @@ namespace WebLoader
         private static async Task Run(string paramFile)
         {
             var now = DateTime.Now;
-            Directory.CreateDirectory("logs");
-            using (_writer = new StreamWriter(Path.Combine("logs", $"log_{now:yyyy-MM-dd-HH-mm-ss}.txt")))
+
+            var logsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "logs");
+            Directory.CreateDirectory(logsPath);
+            var logName = Path.Combine(logsPath, $"log_{now:yyyy-MM-dd_HH-mm-ss}.txt");
+            Console.WriteLine($"Log: {logName}");
+            using (_writer = new StreamWriter(logName))
             {
                 await _writer.WriteLineAsync($"Start: {now:yyyy/MM/dd HH:mm:ss}");
 
