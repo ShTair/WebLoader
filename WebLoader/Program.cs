@@ -31,7 +31,7 @@ namespace WebLoader
 
                 var param = await LoadParamAsync(paramFile);
 
-                var client = await CreateFtpClient(param);
+                var client = CreateSftpClient(param);
 
                 _ignorePaths = new HashSet<string>(param.IgnorePaths);
                 _undeletableNames = new HashSet<string>(param.UndeletableNames);
@@ -52,10 +52,17 @@ namespace WebLoader
             }
         }
 
-        private static async Task<FtpFileClient> CreateFtpClient(TargetParam param)
+        private static async Task<IFileClient> CreateFtpClient(TargetParam param)
         {
             var client = new FtpFileClient(param.Host, param.UserName, param.Password, param.EncodingName);
             await client.ConnectAsync();
+            return client;
+        }
+
+        private static IFileClient CreateSftpClient(TargetParam param)
+        {
+            var client = new SftpFileClient(param.Host, param.UserName, param.Password);
+            client.Connect();
             return client;
         }
 
