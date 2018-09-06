@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WebLoader.Clients;
 
@@ -18,7 +19,7 @@ namespace WebLoader
             Run(args[0]).Wait();
         }
 
-        private static HashSet<string> _ignorePaths;
+        private static Regex[] _ignoreRegices;
         private static HashSet<string> _undeletableNames;
         private static StreamWriter _writer;
 
@@ -38,7 +39,8 @@ namespace WebLoader
 
                 var client = CreateSftpClient(param);
 
-                _ignorePaths = new HashSet<string>(param.IgnorePaths);
+                _ignoreRegices = param.IgnorePaths.Select(t => new Regex(t)).ToArray();
+
                 _undeletableNames = new HashSet<string>(param.UndeletableNames);
                 Directory.CreateDirectory(param.VaultPath);
                 try
@@ -79,7 +81,7 @@ namespace WebLoader
             var items = await client.GetItemsAsync(path);
             foreach (var item in items)
             {
-                if (_ignorePaths.Contains(item.FullName)) continue;
+                if (_ignoreRegices.Any(t => t.IsMatch(item.FullName))) continue;
 
                 switch (item.Type)
                 {
