@@ -11,9 +11,20 @@ namespace WebLoader.Clients
     {
         private SftpClient _client;
 
-        public SftpFileClient(string host, string userName, string password)
+        private SftpFileClient(SftpClient client)
         {
-            _client = new SftpClient(host, userName, password);
+            _client = client;
+        }
+
+        public static SftpFileClient CreateWithPassword(string host, string userName, string password)
+        {
+            return new SftpFileClient(new SftpClient(host, userName, password));
+        }
+
+        public static SftpFileClient CreateWithKeyFile(string host, string userName, string keyPath)
+        {
+            var key = new PrivateKeyFile(keyPath);
+            return new SftpFileClient(new SftpClient(host, userName, key));
         }
 
         public void Connect()

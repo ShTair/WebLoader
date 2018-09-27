@@ -79,11 +79,11 @@ namespace WebLoader
             SftpFileClient client;
             if (string.IsNullOrWhiteSpace(param.Password))
             {
-                client = new SftpFileClient(param.Host, param.UserName, param.KeyPath);
+                client = SftpFileClient.CreateWithKeyFile(param.Host, param.UserName, param.KeyPath);
             }
             else
             {
-                client = new SftpFileClient(param.Host, param.UserName, param.Password);
+                client = SftpFileClient.CreateWithPassword(param.Host, param.UserName, param.Password);
             }
             client.Connect();
             return client;
