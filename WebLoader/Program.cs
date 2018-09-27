@@ -76,7 +76,15 @@ namespace WebLoader
 
         private static IFileClient CreateSftpClient(TargetParam param)
         {
-            var client = new SftpFileClient(param.Host, param.UserName, param.Password);
+            SftpFileClient client;
+            if (string.IsNullOrWhiteSpace(param.Password))
+            {
+                client = new SftpFileClient(param.Host, param.UserName, param.KeyPath);
+            }
+            else
+            {
+                client = new SftpFileClient(param.Host, param.UserName, param.Password);
+            }
             client.Connect();
             return client;
         }
