@@ -10,6 +10,8 @@
 
         public string Password { get; set; }
 
+        public string KeyPath { get; set; }
+
         public string EncodingName { get; set; }
 
         public string BasePath { get; set; }
