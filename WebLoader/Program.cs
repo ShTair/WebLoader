@@ -97,52 +97,60 @@ namespace WebLoader
             var items = await client.GetItemsAsync(path);
             foreach (var item in items)
             {
-                if (_ignoreRegices.Any(t => t.IsMatch(item.FullName))) continue;
-
-                switch (item.Type)
+                try
                 {
-                    case ItemType.File:
-                        {
-                            existsFiles.Remove(item.Name);
-                            var file = new FileInfo(Path.Combine(dstPath, item.Name));
-                            if (!file.Exists || file.LastWriteTime != item.Modified || file.Length != item.Size)
+                    if (_ignoreRegices.Any(t => t.IsMatch(item.FullName))) continue;
+
+                    switch (item.Type)
+                    {
+                        case ItemType.File:
                             {
-                                await _writer.WriteLineAsync($"!: {item.FullName}");
-                                Console.WriteLine($"!: {item.FullName}");
-                                await client.DownloadFileAsync(item.FullName, file.FullName);
+                                existsFiles.Remove(item.Name);
+                                var file = new FileInfo(Path.Combine(dstPath, item.Name));
+                                if (!file.Exists || file.LastWriteTime != item.Modified || file.Length != item.Size)
+                                {
+                                    await _writer.WriteLineAsync($"!: {item.FullName}");
+                                    Console.WriteLine($"!: {item.FullName}");
+                                    await client.DownloadFileAsync(item.FullName, file.FullName);
 
-                                file.Refresh();
-                                if (file.Length != item.Size) throw new Exception();
-                                file.LastWriteTime = item.Modified;
+                                    file.Refresh();
+                                    if (file.Length != item.Size) throw new Exception();
+                                    file.LastWriteTime = item.Modified;
+                                }
+                                else
+                                {
+                                    await _writer.WriteLineAsync($"x: {item.FullName}");
+                                    Console.WriteLine($"x: {item.FullName}");
+                                }
                             }
-                            else
+                            break;
+                        case ItemType.Directory:
                             {
-                                await _writer.WriteLineAsync($"x: {item.FullName}");
-                                Console.WriteLine($"x: {item.FullName}");
+                                existsDirectories.Remove(item.Name);
+                                await _writer.WriteLineAsync($"D: {item.FullName}");
+                                Console.WriteLine($"D: {item.FullName}");
+                                var ndpath = Path.Combine(dstPath, item.Name);
+                                Directory.CreateDirectory(ndpath);
+
+                                await LoadDirectoriesAsync(client, item.FullName, ndpath);
+
+                                Directory.SetLastWriteTime(ndpath, item.Modified);
                             }
-                        }
-                        break;
-                    case ItemType.Directory:
-                        {
-                            existsDirectories.Remove(item.Name);
-                            await _writer.WriteLineAsync($"D: {item.FullName}");
-                            Console.WriteLine($"D: {item.FullName}");
-                            var ndpath = Path.Combine(dstPath, item.Name);
-                            Directory.CreateDirectory(ndpath);
-
-                            await LoadDirectoriesAsync(client, item.FullName, ndpath);
-
-                            Directory.SetLastWriteTime(ndpath, item.Modified);
-                        }
-                        break;
-                    case ItemType.Others:
-                        await _writer.WriteLineAsync($"O: {item.FullName}");
-                        Console.WriteLine($"O: {item.FullName}");
-                        break;
-                    default:
-                        await _writer.WriteLineAsync($"?: {item.FullName}");
-                        Console.WriteLine($"?: {item.FullName}");
-                        break;
+                            break;
+                        case ItemType.Others:
+                            await _writer.WriteLineAsync($"O: {item.FullName}");
+                            Console.WriteLine($"O: {item.FullName}");
+                            break;
+                        default:
+                            await _writer.WriteLineAsync($"?: {item.FullName}");
+                            Console.WriteLine($"?: {item.FullName}");
+                            break;
+                    }
+                }
+                catch (Exception exp)
+                {
+                    await _writer.WriteLineAsync("ERROR");
+                    await _writer.WriteLineAsync(exp.ToString());
                 }
             }
 
