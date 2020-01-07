@@ -99,6 +99,13 @@ namespace WebLoader
             {
                 try
                 {
+                    if (item.Name.IndexOf("\\") != -1)
+                    {
+                        await _writer.WriteLineAsync($"XX: {item.FullName}");
+                        Console.WriteLine($"XX: {item.FullName}");
+                        continue;
+                    }
+
                     if (_ignoreRegices.Any(t => t.IsMatch(item.FullName))) continue;
 
                     switch (item.Type)
